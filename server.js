@@ -14,8 +14,15 @@ app.get('/api/location', (req, res) => {
         .catch((e) => res.sendStatus(500));
 });
 
+app.get('/api/location/:woeid', (req, res) => {
+    const { params: { woeid } } = req;
+    return api.get(`/location/${woeid}`)
+        .then(({ data }) => res.json(data))
+        .catch((e) => console.log(e) || res.sendStatus(500))
+})
+
 app.get('*', (req, res) => {
-    res.json("Make sure you're using /api/location/search?query={your search term}");
+    res.json("Make sure you're using /api/location/search?query={your search term} or /api/location/{woeid}");
 })
 
 app.listen(3000, () => {
