@@ -1,3 +1,5 @@
+import Timer = NodeJS.Timer;
+
 console.log('hi');
 
 const form: HTMLFormElement = document.querySelector('form');
@@ -18,6 +20,8 @@ interface LocationItem {
 interface LocationResults extends SearchResultItem   {
     consolidated_weather: LocationItem[];
 }
+
+let refreshInterval: number | null = null;
 
 type SearchResultData = Array<SearchResultItem>;
 const renderItem = (item: SearchResultItem) => {
@@ -42,12 +46,21 @@ Weather state: ${item.weather_state_name}
 <img src="https://www.metaweather.com/static/img/weather/${item.weather_state_abbr}.svg" height="20px">`;
 };
 
-preSearchResult.addEventListener('click', (e: Event): void => {
-
-    const woeid = (e.target as HTMLButtonElement).dataset.woeid;
+const loadLocationResults = (woeid: string): void => {
     fetch(`http://localhost:3000/api/location/${woeid}`)
         .then((r) => r.json())
         .then(renderLocationResults);
+};
+
+preSearchResult.addEventListener('click', (e: Event): void => {
+
+    const woeid = (e.target as HTMLButtonElement).dataset.woeid;
+    const loader = () => loadLocationResults(woeid);
+    loader();
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+    }
+    refreshInterval = setInterval(loader, 1e4 * 36e2) as any as number;
 });
 form.addEventListener('submit', (e: Event): void => {
     e.preventDefault();
